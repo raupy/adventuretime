@@ -1,4 +1,5 @@
 library(readr)
+library(stringr)
 
 refactor_names = function(table){
   names <- readRDS("characterNames.rds")
@@ -23,6 +24,29 @@ join_similar_cols = function(table, remaining_col, col_to_delete){
   table[[remaining_col]][c] = values
   table[col_to_delete] = NULL
   table
+}
+
+refactor_categories = function(entry){
+  entry = str_replace_all(entry, fixed("\n, Characters\n, "), ", ")
+  entry = str_replace_all(entry, fixed(" Characters\n, "), ", ")
+  entry = str_replace_all(entry, fixed("Characters\n, "), "")
+  entry = str_replace_all(entry, fixed("Characters"), "")
+  entry = str_replace_all(entry, fixed("Character"), "")
+  entry = str_replace_all(entry, fixed("characters"), "")
+  entry = str_replace_all(entry, fixed("character"), "")
+  entry = str_replace_all(entry, "[\n]", "")
+  cats = str_split(entry, fixed(", "))
+  cats = lapply(cats[[1]], replace_white_spaces)
+  cats = str_sort(cats)
+  cats = str_c(cats, collapse = ", ")
+  cats
+}
+
+replace_white_spaces = function(text){
+  splits = str_split(text, " ")
+  splits = splits[[1]][which(splits[[1]] != "")]
+  splits = paste(splits, collapse = "-")
+  splits
 }
 
 refactor_table = function(table){
@@ -50,6 +74,10 @@ refactor_table = function(table){
           "ruler", "bio", "status", "real", "members", "featured", "leader", "act",
           "origin", "owner", "knowncharacters", "type")
   table = delete_cols(table, del)
+  ref = lapply(table$categories, refactor_categories)
+  refc = as.character(ref)
+  fac = as.factor(refc)
+  table$cats = fac
   write_csv(table, path = "at_refactored.csv")
   table
 }
@@ -67,3 +95,10 @@ delete_cols = function(table, cols){
 #730 löschen, leader löschen
 
 #evtl form1, form2, form3, form4, form5 in neue tabelle
+
+my.read.csv = function(file.name) {
+  read.csv(file.name, header = TRUE, encoding = "UTF-8", stringsAsFactors = FALSE)
+}
+
+table = my.read.csv("adventuretime.csv")
+
