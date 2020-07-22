@@ -1,0 +1,98 @@
+---
+title: "Adventure Time Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning = FALSE, error = FALSE)
+```
+
+```{r, code = readLines("Analysis.R"), echo=FALSE}
+```
+
+
+
+Row
+-----------------------------------------------------------------------
+
+### Total characters
+
+```{r}
+renderValueBox({
+  valueBox(length(tab$X), icon = "fa-users", color = "grey")
+})
+```
+
+
+### Most popular species
+
+```{r}
+spec = summary(as.factor(tab$species))[1]
+count = str_c(c("(", as.character(spec[[1]]), ")"), collapse = "")
+text = str_c(c(names(spec[1]), count), collapse = " ")
+renderValueBox({
+  valueBox(text, icon = "fa-cookie-bite", color = "pink")
+})
+```
+
+### Princesses
+
+```{r}
+princesses = getRowsWithSpecialValue(tab, cats, "Princess")
+# Emit the download count
+renderValueBox({
+  valueBox(length(princesses$cats), icon = "fa-crown", color = "pink")
+})
+```
+
+### Deceased characters
+```{r}
+dec = getRowsWithSpecialValue(tab, cats, "Deceased")
+renderValueBox({
+  valueBox(length(dec$cats), icon = "fa-dizzy", color = "grey")
+})
+```
+
+
+Row {data-height=250}
+-----------------------------------------------------------------------
+
+### Chart A 
+```{r}
+```
+
+### Treemap
+
+```{r, fig.show='hide'}
+cats_tab = get_cats_tab()
+inter = make_tree_map(cats_tab)
+inter
+```
+
+### Word cloud for character categories {data-width=340}
+
+```{r, fig.align='center'}
+word.cloud(col = tab$cats, sz = 0.9)
+```
+
+Row {data-height=150}
+-----------------------------------------------------------------------
+
+### Chart c
+
+```{r}
+
+```
+
+### Word D
+
+```{r}
+```
+
+
+
